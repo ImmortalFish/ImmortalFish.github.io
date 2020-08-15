@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="滕磊">
+
+
+
+    <meta name="description" content="滕磊的博客">
+
+
+
+<title>SQL知识总结 | 滕磊的博客</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 5.0.2"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">滕磊的博客</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">滕磊的博客</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">SQL知识总结</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">滕磊</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">八月 15, 2020&nbsp;&nbsp;16:12:44</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>[TOC]</p>
+<h2 id="NOT-AND-OR-优先级"><a href="#NOT-AND-OR-优先级" class="headerlink" title="NOT, AND, OR 优先级"></a>NOT, AND, OR 优先级</h2><p>SQL语句中，关键字<strong>NOT, AND, OR</strong>的优先级由高到低排序为：<code>NOT &gt; AND &gt; OR</code></p>
+<p>SQL语句在执行时会按照上述优先级依次执行语句，SQL会将<strong>OR</strong>关键字的两边当作两个部分进行判定，例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM student WHERE condition1 and condition2 or condition3 and condition4</span><br></pre></td></tr></table></figure>
+
+<p>上述SQL语句的本意是,找到<strong>符合<em>condition1</em>和<em>condition2</em>或者<em>condition3</em>和<em>condition4</em>的数据</strong>,但是在实际上SQL执行上述语句时,执行的顺序如下:</p>
+<ol>
+<li><em>condition1</em> and <em>condition2</em></li>
+<li><em>condition3</em> and <em>condition4</em></li>
+<li>最后再将上述两个步骤的结果进行OR运算</li>
+</ol>
+<p>而正确的写法应该是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM student WHERE condition1 and (condition2 or condition3) and condition4</span><br></pre></td></tr></table></figure>
+
+<p>因此在混用这几个关键字的时候<strong>尽量使用括号来区分相关逻辑</strong>，一来不易出错，二来方便检查代码逻辑。</p>
+<h2 id="SQL外连接中ON和WHERE的区别"><a href="#SQL外连接中ON和WHERE的区别" class="headerlink" title="SQL外连接中ON和WHERE的区别"></a>SQL外连接中ON和WHERE的区别</h2><p>首先先说<strong>结论</strong>：在外连接中，连接两张和多张表时，会先生成一张临时表，然后再返回该临时表给用户，ON和WHERE的区别关键在于作用的时机不同。<strong>ON作用于返回临时表前，WHERE作用于返回临时表后。</strong></p>
+<p>例如有两张表如下：</p>
+<p><em>表一：tab1</em></p>
+<table>
+<thead>
+<tr>
+<th align="center">id</th>
+<th align="center">size</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1</td>
+<td align="center">10</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">20</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">30</td>
+</tr>
+</tbody></table>
+<p><em>表二：tab2</em></p>
+<table>
+<thead>
+<tr>
+<th align="center">size</th>
+<th align="center">name</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">10</td>
+<td align="center">AAA</td>
+</tr>
+<tr>
+<td align="center">20</td>
+<td align="center">BBB</td>
+</tr>
+<tr>
+<td align="center">20</td>
+<td align="center">CCC</td>
+</tr>
+</tbody></table>
+<p>对上述两个表分别应用如下两个SQL语句：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1. select * form tab1 left join tab2 on (tab1.size &#x3D; tab2.size) where tab2.name&#x3D;&#39;AAA&#39;</span><br><span class="line">2. select * form tab1 left join tab2 on (tab1.size &#x3D; tab2.size and tab2.name&#x3D;&#39;AAA&#39;)</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong><em>第一个SQL语句的执行过程如下</em></strong>：</p>
+<blockquote>
+<p>首先在<strong>生成临时表前</strong>，会根据<em>on</em>条件进行匹配筛选生成临时表如下：</p>
+<table>
+<thead>
+<tr>
+<th align="center">tab1.id</th>
+<th align="center">tab1.size</th>
+<th align="center">tab2.size</th>
+<th align="center">tab2.name</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1</td>
+<td align="center">10</td>
+<td align="center">10</td>
+<td align="center">AAA</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">20</td>
+<td align="center">20</td>
+<td align="center">BBB</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">20</td>
+<td align="center">20</td>
+<td align="center">CCC</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">30</td>
+<td align="center">(null)</td>
+<td align="center">(null)</td>
+</tr>
+</tbody></table>
+<p>紧接着，<strong>生成临时表后</strong>，会根据<em>where</em>条件进行筛选数据并返回最终结果表：</p>
+<table>
+<thead>
+<tr>
+<th align="center">tab1.id</th>
+<th align="center">tab1.size</th>
+<th align="center">tab2.size</th>
+<th align="center">tab2.name</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1</td>
+<td align="center">10</td>
+<td align="center">10</td>
+<td align="center">AAA</td>
+</tr>
+</tbody></table>
+</blockquote>
+<p><strong><em>第二个SQL语句的执行结果如下：</em></strong></p>
+<blockquote>
+<p>在生成临时表前，会根据<em>on</em>条件进行匹配筛选，首先是条件<code>tab1.size = tab2.size</code>：</p>
+<table>
+<thead>
+<tr>
+<th align="center">tab1.id</th>
+<th align="center">tab1.size</th>
+<th align="center">tab2.size</th>
+<th align="center">tab2.name</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1</td>
+<td align="center">10</td>
+<td align="center">10</td>
+<td align="center">AAA</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">20</td>
+<td align="center">20</td>
+<td align="center">BBB</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">20</td>
+<td align="center">20</td>
+<td align="center">CCC</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">30</td>
+<td align="center">(null)</td>
+<td align="center">(null)</td>
+</tr>
+</tbody></table>
+<p>然后是条件<code>tab2.name=&#39;AAA&#39;</code>：</p>
+<table>
+<thead>
+<tr>
+<th align="center">tab1.id</th>
+<th align="center">tab1.size</th>
+<th align="center">tab2.size</th>
+<th align="center">tab2.name</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1</td>
+<td align="center">10</td>
+<td align="center">10</td>
+<td align="center">AAA</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">20</td>
+<td align="center">(null)</td>
+<td align="center">(null)</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">30</td>
+<td align="center">(null)</td>
+<td align="center">(null)</td>
+</tr>
+</tbody></table>
+<p>可以理解为：在生成临时表前，会根据<em>on</em>条件进行匹配筛选，首先是条件<code>tab1.size = tab2.size</code>，然后是条件<code>tab2.name=&#39;AAA&#39;</code></p>
+</blockquote>
+<p>总结一下就是：<strong>在外连接（<em>left join,right join,full join</em>）时，<em>on</em>关键字的条件不管是否为真，都会根据外连接类型返回对应的全部记录，如果该字段没有数据则置为<em>null</em>；而<em>where</em>则是在临时表中进行条件筛选。但内连接（<em>inner join</em>）中两种情况返回的结果是一样的。</strong></p>
+<h2 id="ORACLE查询表的字段名称、数据类型等信息"><a href="#ORACLE查询表的字段名称、数据类型等信息" class="headerlink" title="ORACLE查询表的字段名称、数据类型等信息"></a>ORACLE查询表的字段名称、数据类型等信息</h2><p>通过<code>ALL_TAB_COLUMNS</code>和<code>USER_TAB_COLUMNS</code>两个表进行查询，这两个表都包含了数据库中表的相关信息，如字段名、字段类型等。不同点在于<code>ALL_TAB_COLUMNS</code>会将所有用户下的相同表名的列都查询出来，可能造成重复和错误；而<code>USER_TAB_COLUMNS</code>只查询某一用户下某张表。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">--查询某张表中的字段名，字段类型，是否为空，字段长度等信息</span></span><br><span class="line"><span class="keyword">SELECT</span> COLUMN_ID, TABLE_NAME, COLUMN_NAME, DATA_TYPE, DATA_LENGTH, NULLABLE</span><br><span class="line">  <span class="keyword">FROM</span> ALL_TAB_COLUMNS</span><br><span class="line"> <span class="keyword">WHERE</span> TABLE_NAME = <span class="string">&#x27;TABLE_NAME&#x27;</span></span><br><span class="line"> <span class="keyword">ORDER</span> <span class="keyword">BY</span> COLUMN_ID;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>##SQL的TRUNC函数使用</p>
+<p><code>TRUNC</code>函数主要用于截取<strong>数字</strong>和<strong>时间</strong>。</p>
+<ol>
+<li><p><strong>时间</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">select TRUNC(sysdate) from dual  --2011-3-18  返回今天的日期为2011-3-18</span><br><span class="line">select TRUNC(sysdate,&#39;mm&#39;) from dual  --2011-3-1    返回当月第一天</span><br><span class="line">select TRUNC(sysdate,&#39;yy&#39;) from dual  --2011-1-1    返回当年第一天</span><br><span class="line">select TRUNC(sysdate,&#39;dd&#39;) from dual  --2011-3-18   返回当前年月日</span><br><span class="line">select TRUNC(sysdate,&#39;yyyy&#39;) from dual --2011-1-1   返回当年第一天</span><br><span class="line">select TRUNC(sysdate,&#39;d&#39;) from dual    --2011-3-13 (星期天)返回当前星期的第一天</span><br><span class="line">select TRUNC(sysdate,&#39;hh&#39;) from dual   --2011-3-18 14:00:00  当前时间为14:41</span><br><span class="line">select TRUNC(sysdate, &#39;mi&#39;) from dual  --2011-3-18 14:41:00   TRUNC()函数没有秒的精确</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>数字</strong></p>
+<p>数字的截取方式为<code>TRUNC(number,num_digits)</code>，其中number是指需要截取的数字， num_digits是指取整精度的数字，默认为0。TRUNC函数在进行截取时<strong>不会进行四舍五入</strong>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">select TRUNC(123.458) from dual    --123</span><br><span class="line">select TRUNC(123.458,0) from dual  --123</span><br><span class="line">select TRUNC(123.458,1) from dual  --123.4</span><br><span class="line">select TRUNC(123.458,-1) from dual --120</span><br><span class="line">select TRUNC(123.458,-4) from dual --0</span><br><span class="line">select TRUNC(123.458,4) from dual  --123.458</span><br><span class="line">select TRUNC(123) from dual        --123</span><br><span class="line">select TRUNC(123,1) from dual      --123</span><br><span class="line">select TRUNC(123,-1) from dual     --120</span><br></pre></td></tr></table></figure>
+
+
+
+
+</li>
+</ol>
+<h2 id="UNION去重注意事项"><a href="#UNION去重注意事项" class="headerlink" title="UNION去重注意事项"></a>UNION去重注意事项</h2><p><code>union</code>关键字有一个很特别的功能：<strong>去重</strong>。但是这个功能存在一个不常被人注意的问题：<strong>去重操作是在合并之后统一进行去重的</strong>。</p>
+<p>举个例子，这个也是在实际工作中遇到的问题。</p>
+<blockquote>
+<p>有如下两个表：</p>
+<p>表A</p>
+<table>
+<thead>
+<tr>
+<th align="center">id</th>
+<th align="center">name</th>
+<th align="center">age</th>
+<th align="center">money</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1</td>
+<td align="center">张三</td>
+<td align="center">19</td>
+<td align="center">2000</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">张三</td>
+<td align="center">19</td>
+<td align="center">2000</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">李四</td>
+<td align="center">45</td>
+<td align="center">40000</td>
+</tr>
+</tbody></table>
+<p>表B</p>
+<table>
+<thead>
+<tr>
+<th align="center">id</th>
+<th align="center">name</th>
+<th align="center">age</th>
+<th align="center">money</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1</td>
+<td align="center">张三</td>
+<td align="center">19</td>
+<td align="center">2000</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">孙五</td>
+<td align="center">42</td>
+<td align="center">30000</td>
+</tr>
+</tbody></table>
+</blockquote>
+<p>那么问题来了，如果在最终提取时的sql语句如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">SELECT name,</span><br><span class="line">       age,</span><br><span class="line">       money</span><br><span class="line">    FROM a</span><br><span class="line">UNION</span><br><span class="line">SELECT name,</span><br><span class="line">       age,</span><br><span class="line">       money</span><br><span class="line">    FROM b</span><br></pre></td></tr></table></figure>
+
+<p>最终的结果集中只会有一条**”张三”<strong>的记录，就算a表中的两条张三数据是不相同的，也会去重掉。因此<code>UNION</code>关键字的去重是</strong>在合并之后统一进行去重的**。因此在实际操作使用中，一定要注意这个问题！</p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>滕磊</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://yoursite.com/2020/08/15/SQL%E6%80%BB%E7%BB%93/">http://yoursite.com/2020/08/15/SQL%E6%80%BB%E7%BB%93/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2020/08/15/hello-world/">Hello World</a>
+            
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 滕磊 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>
