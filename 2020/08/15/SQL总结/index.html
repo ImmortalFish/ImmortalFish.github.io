@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-Hans">
 <head>
     <meta charset="UTF-8">
 <meta name="viewport"
@@ -184,19 +184,25 @@
 
                     
                         <span class="post-time">
-                        Date: <a href="#">八月 15, 2020&nbsp;&nbsp;16:12:44</a>
+                        Date: <a href="#">August 15, 2020&nbsp;&nbsp;16:12:44</a>
                         </span>
                     
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/SQL/">SQL</a>
+                            
+                        </span>
                     
                 </div>
             
         </header>
 
         <div class="post-content">
-            <p>[TOC]</p>
-<h2 id="NOT-AND-OR-优先级"><a href="#NOT-AND-OR-优先级" class="headerlink" title="NOT, AND, OR 优先级"></a>NOT, AND, OR 优先级</h2><p>SQL语句中，关键字<strong>NOT, AND, OR</strong>的优先级由高到低排序为：<code>NOT &gt; AND &gt; OR</code></p>
+            <h2 id="NOT-AND-OR-优先级"><a href="#NOT-AND-OR-优先级" class="headerlink" title="NOT, AND, OR 优先级"></a>NOT, AND, OR 优先级</h2><p>SQL语句中，关键字<strong>NOT, AND, OR</strong>的优先级由高到低排序为：<code>NOT &gt; AND &gt; OR</code></p>
 <p>SQL语句在执行时会按照上述优先级依次执行语句，SQL会将<strong>OR</strong>关键字的两边当作两个部分进行判定，例如：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM student WHERE condition1 and condition2 or condition3 and condition4</span><br></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> student <span class="keyword">WHERE</span> condition1 <span class="keyword">and</span> condition2 <span class="keyword">or</span> condition3 <span class="keyword">and</span> condition4</span><br></pre></td></tr></table></figure>
 
 <p>上述SQL语句的本意是,找到<strong>符合<em>condition1</em>和<em>condition2</em>或者<em>condition3</em>和<em>condition4</em>的数据</strong>,但是在实际上SQL执行上述语句时,执行的顺序如下:</p>
 <ol>
@@ -205,7 +211,7 @@
 <li>最后再将上述两个步骤的结果进行OR运算</li>
 </ol>
 <p>而正确的写法应该是：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM student WHERE condition1 and (condition2 or condition3) and condition4</span><br></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> student <span class="keyword">WHERE</span> condition1 <span class="keyword">and</span> (condition2 <span class="keyword">or</span> condition3) <span class="keyword">and</span> condition4</span><br></pre></td></tr></table></figure>
 
 <p>因此在混用这几个关键字的时候<strong>尽量使用括号来区分相关逻辑</strong>，一来不易出错，二来方便检查代码逻辑。</p>
 <h2 id="SQL外连接中ON和WHERE的区别"><a href="#SQL外连接中ON和WHERE的区别" class="headerlink" title="SQL外连接中ON和WHERE的区别"></a>SQL外连接中ON和WHERE的区别</h2><p>首先先说<strong>结论</strong>：在外连接中，连接两张和多张表时，会先生成一张临时表，然后再返回该临时表给用户，ON和WHERE的区别关键在于作用的时机不同。<strong>ON作用于返回临时表前，WHERE作用于返回临时表后。</strong></p>
@@ -253,7 +259,7 @@
 </tr>
 </tbody></table>
 <p>对上述两个表分别应用如下两个SQL语句：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1. select * form tab1 left join tab2 on (tab1.size &#x3D; tab2.size) where tab2.name&#x3D;&#39;AAA&#39;</span><br><span class="line">2. select * form tab1 left join tab2 on (tab1.size &#x3D; tab2.size and tab2.name&#x3D;&#39;AAA&#39;)</span><br></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1. <span class="keyword">select</span> * <span class="keyword">form</span> tab1 <span class="keyword">left</span> <span class="keyword">join</span> tab2 <span class="keyword">on</span> (tab1.size = tab2.size) <span class="keyword">where</span> tab2.name=<span class="string">&#x27;AAA&#x27;</span></span><br><span class="line"><span class="number">2.</span> <span class="keyword">select</span> * <span class="keyword">form</span> tab1 <span class="keyword">left</span> <span class="keyword">join</span> tab2 <span class="keyword">on</span> (tab1.size = tab2.size <span class="keyword">and</span> tab2.name=<span class="string">&#x27;AAA&#x27;</span>)</span><br></pre></td></tr></table></figure>
 
 
 
@@ -386,15 +392,14 @@
 
 
 
-<p>##SQL的TRUNC函数使用</p>
-<p><code>TRUNC</code>函数主要用于截取<strong>数字</strong>和<strong>时间</strong>。</p>
+<h2 id="SQL的TRUNC函数使用"><a href="#SQL的TRUNC函数使用" class="headerlink" title="SQL的TRUNC函数使用"></a>SQL的TRUNC函数使用</h2><p><code>TRUNC</code>函数主要用于截取<strong>数字</strong>和<strong>时间</strong>。</p>
 <ol>
 <li><p><strong>时间</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">select TRUNC(sysdate) from dual  --2011-3-18  返回今天的日期为2011-3-18</span><br><span class="line">select TRUNC(sysdate,&#39;mm&#39;) from dual  --2011-3-1    返回当月第一天</span><br><span class="line">select TRUNC(sysdate,&#39;yy&#39;) from dual  --2011-1-1    返回当年第一天</span><br><span class="line">select TRUNC(sysdate,&#39;dd&#39;) from dual  --2011-3-18   返回当前年月日</span><br><span class="line">select TRUNC(sysdate,&#39;yyyy&#39;) from dual --2011-1-1   返回当年第一天</span><br><span class="line">select TRUNC(sysdate,&#39;d&#39;) from dual    --2011-3-13 (星期天)返回当前星期的第一天</span><br><span class="line">select TRUNC(sysdate,&#39;hh&#39;) from dual   --2011-3-18 14:00:00  当前时间为14:41</span><br><span class="line">select TRUNC(sysdate, &#39;mi&#39;) from dual  --2011-3-18 14:41:00   TRUNC()函数没有秒的精确</span><br></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> TRUNC(<span class="keyword">sysdate</span>) <span class="keyword">from</span> dual  <span class="comment">--2011-3-18  返回今天的日期为2011-3-18</span></span><br><span class="line"><span class="keyword">select</span> TRUNC(<span class="keyword">sysdate</span>,<span class="string">&#x27;mm&#x27;</span>) <span class="keyword">from</span> dual  <span class="comment">--2011-3-1    返回当月第一天</span></span><br><span class="line"><span class="keyword">select</span> TRUNC(<span class="keyword">sysdate</span>,<span class="string">&#x27;yy&#x27;</span>) <span class="keyword">from</span> dual  <span class="comment">--2011-1-1    返回当年第一天</span></span><br><span class="line"><span class="keyword">select</span> TRUNC(<span class="keyword">sysdate</span>,<span class="string">&#x27;dd&#x27;</span>) <span class="keyword">from</span> dual  <span class="comment">--2011-3-18   返回当前年月日</span></span><br><span class="line"><span class="keyword">select</span> TRUNC(<span class="keyword">sysdate</span>,<span class="string">&#x27;yyyy&#x27;</span>) <span class="keyword">from</span> dual <span class="comment">--2011-1-1   返回当年第一天</span></span><br><span class="line"><span class="keyword">select</span> TRUNC(<span class="keyword">sysdate</span>,<span class="string">&#x27;d&#x27;</span>) <span class="keyword">from</span> dual    <span class="comment">--2011-3-13 (星期天)返回当前星期的第一天</span></span><br><span class="line"><span class="keyword">select</span> TRUNC(<span class="keyword">sysdate</span>,<span class="string">&#x27;hh&#x27;</span>) <span class="keyword">from</span> dual   <span class="comment">--2011-3-18 14:00:00  当前时间为14:41</span></span><br><span class="line"><span class="keyword">select</span> TRUNC(<span class="keyword">sysdate</span>, <span class="string">&#x27;mi&#x27;</span>) <span class="keyword">from</span> dual  <span class="comment">--2011-3-18 14:41:00   TRUNC()函数没有秒的精确</span></span><br></pre></td></tr></table></figure>
 </li>
 <li><p><strong>数字</strong></p>
 <p>数字的截取方式为<code>TRUNC(number,num_digits)</code>，其中number是指需要截取的数字， num_digits是指取整精度的数字，默认为0。TRUNC函数在进行截取时<strong>不会进行四舍五入</strong>。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">select TRUNC(123.458) from dual    --123</span><br><span class="line">select TRUNC(123.458,0) from dual  --123</span><br><span class="line">select TRUNC(123.458,1) from dual  --123.4</span><br><span class="line">select TRUNC(123.458,-1) from dual --120</span><br><span class="line">select TRUNC(123.458,-4) from dual --0</span><br><span class="line">select TRUNC(123.458,4) from dual  --123.458</span><br><span class="line">select TRUNC(123) from dual        --123</span><br><span class="line">select TRUNC(123,1) from dual      --123</span><br><span class="line">select TRUNC(123,-1) from dual     --120</span><br></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> TRUNC(<span class="number">123.458</span>) <span class="keyword">from</span> dual    <span class="comment">--123</span></span><br><span class="line"><span class="keyword">select</span> TRUNC(<span class="number">123.458</span>,<span class="number">0</span>) <span class="keyword">from</span> dual  <span class="comment">--123</span></span><br><span class="line"><span class="keyword">select</span> TRUNC(<span class="number">123.458</span>,<span class="number">1</span>) <span class="keyword">from</span> dual  <span class="comment">--123.4</span></span><br><span class="line"><span class="keyword">select</span> TRUNC(<span class="number">123.458</span>,<span class="number">-1</span>) <span class="keyword">from</span> dual <span class="comment">--120</span></span><br><span class="line"><span class="keyword">select</span> TRUNC(<span class="number">123.458</span>,<span class="number">-4</span>) <span class="keyword">from</span> dual <span class="comment">--0</span></span><br><span class="line"><span class="keyword">select</span> TRUNC(<span class="number">123.458</span>,<span class="number">4</span>) <span class="keyword">from</span> dual  <span class="comment">--123.458</span></span><br><span class="line"><span class="keyword">select</span> TRUNC(<span class="number">123</span>) <span class="keyword">from</span> dual        <span class="comment">--123</span></span><br><span class="line"><span class="keyword">select</span> TRUNC(<span class="number">123</span>,<span class="number">1</span>) <span class="keyword">from</span> dual      <span class="comment">--123</span></span><br><span class="line"><span class="keyword">select</span> TRUNC(<span class="number">123</span>,<span class="number">-1</span>) <span class="keyword">from</span> dual     <span class="comment">--120</span></span><br></pre></td></tr></table></figure>
 
 
 
@@ -459,7 +464,7 @@
 </tbody></table>
 </blockquote>
 <p>那么问题来了，如果在最终提取时的sql语句如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">SELECT name,</span><br><span class="line">       age,</span><br><span class="line">       money</span><br><span class="line">    FROM a</span><br><span class="line">UNION</span><br><span class="line">SELECT name,</span><br><span class="line">       age,</span><br><span class="line">       money</span><br><span class="line">    FROM b</span><br></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">name</span>,</span><br><span class="line">       age,</span><br><span class="line">       money</span><br><span class="line">    <span class="keyword">FROM</span> a</span><br><span class="line"><span class="keyword">UNION</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">name</span>,</span><br><span class="line">       age,</span><br><span class="line">       money</span><br><span class="line">    <span class="keyword">FROM</span> b</span><br></pre></td></tr></table></figure>
 
 <p>最终的结果集中只会有一条**”张三”<strong>的记录，就算a表中的两条张三数据是不相同的，也会去重掉。因此<code>UNION</code>关键字的去重是</strong>在合并之后统一进行去重的**。因此在实际操作使用中，一定要注意这个问题！</p>
 
@@ -476,20 +481,10 @@
                 
                     <p class="copyright-item">
                         <span>Permalink:</span>
-                        <span><a href="http://yoursite.com/2020/08/15/SQL%E6%80%BB%E7%BB%93/">http://yoursite.com/2020/08/15/SQL%E6%80%BB%E7%BB%93/</a></span>
+                        <span><a href="https://immortalfish.github.io/2020/08/15/SQL%E6%80%BB%E7%BB%93/">https://immortalfish.github.io/2020/08/15/SQL%E6%80%BB%E7%BB%93/</a></span>
                     </p>
                 
                 
-                    <p class="copyright-item">
-                        <span>License:</span>
-                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
-                    </p>
-                
-                
-                     <p class="copyright-item">
-                         <span>Slogan:</span>
-                         <span>Do you believe in <strong>DESTINY</strong>?</span>
-                     </p>
                 
 
             </section>
@@ -499,6 +494,10 @@
                 <span>Tag(s):</span>
                 <span class="tag">
                     
+                    
+                        <a href="/tags/SQL/"># SQL</a>
+                    
+                        
                 </span>
             </div>
             <div>
@@ -508,8 +507,6 @@
             </div>
         </section>
         <section class="post-nav">
-            
-                <a class="prev" rel="prev" href="/2020/08/15/hello-world/">Hello World</a>
             
             
         </section>
