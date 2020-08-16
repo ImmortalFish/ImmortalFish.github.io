@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="滕磊">
+
+
+
+    <meta name="description" content="滕磊的博客">
+
+
+
+<title>机器学习-单标签分类评估方法 | 滕磊的博客</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 5.0.2"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">滕磊的博客</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">滕磊的博客</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">机器学习-单标签分类评估方法</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">滕磊</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">June 16, 2019&nbsp;&nbsp;14:56:21</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>本篇主要介绍机器学习中常见单标签分类评估方法。</p>
+<p><strong>单标签分类</strong>是指一个样本有且仅有一个标签，常见的如西瓜甜或者不甜这种<strong>二分类问题</strong> 或者某人的身高是高、中还是低的<strong>多分类问题</strong> 。</p>
+<h3 id="混淆矩阵"><a href="#混淆矩阵" class="headerlink" title="混淆矩阵"></a>混淆矩阵</h3><p>对于单标签分类问题有一个很重要的工具：<strong>混淆矩阵(confusion matrix)</strong> 又称<strong>可能性表格</strong>或是<strong>错误矩阵</strong>，在无监督学习中又称为**匹配矩阵(matching matrix)**。矩阵的每一列代表一个类的实例预测，而每一行表示一个实际的类的实例，这个名字来源于它可以非常容易的表明多个类别是否有混淆。</p>
+<p>下面以一个有三个类的分类问题为例子来介绍混淆矩阵：</p>
+<p>假设有一个用来对猫（cat）、狗（dog）、兔子（rabbit）进行分类的系统，混淆矩阵就是为了进一步分析性能而对该算法测试结果做出的总结。该混淆矩阵就该如下表所示</p>
+<table>
+<thead>
+<tr>
+<th align="center"></th>
+<th align="center"></th>
+<th align="center">预测值</th>
+<th align="center">预测值</th>
+<th align="center">预测值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center">cat</td>
+<td align="center">dog</td>
+<td align="center">rabbit</td>
+</tr>
+<tr>
+<td align="center"><strong>真实值</strong></td>
+<td align="center">cat</td>
+<td align="center">5</td>
+<td align="center">3</td>
+<td align="center">0</td>
+</tr>
+<tr>
+<td align="center"><strong>真实值</strong></td>
+<td align="center">dog</td>
+<td align="center">2</td>
+<td align="center">3</td>
+<td align="center">1</td>
+</tr>
+<tr>
+<td align="center"><strong>真实值</strong></td>
+<td align="center">rabbit</td>
+<td align="center">0</td>
+<td align="center">2</td>
+<td align="center">11</td>
+</tr>
+</tbody></table>
+<p>可以看到第一行中的信息为分类器把8只猫分别分为了5只猫和3只狗，则表示有5个分类正确，3个分类错误。同理分类器把6只狗分类成了2只猫，3只狗和1只兔子，表示有3个分类正确，2个错分成了猫，1只错分成了兔子。</p>
+<p>如果想把每一种动物单独拿出来用混淆矩阵表示也是可以的，例如以猫为例子，混淆矩阵如下：</p>
+<table>
+<thead>
+<tr>
+<th align="center"></th>
+<th align="center"></th>
+<th align="center">预测值</th>
+<th align="center">预测值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center">cat</td>
+<td align="center">not-cat</td>
+</tr>
+<tr>
+<td align="center"><strong>真实值</strong></td>
+<td align="center">cat</td>
+<td align="center">5 (实际为猫，预测也为猫)</td>
+<td align="center">3 (实际为猫，预测不为猫)</td>
+</tr>
+<tr>
+<td align="center"><strong>真实值</strong></td>
+<td align="center">not-cat</td>
+<td align="center">2 (实际不为猫，但是预测为猫)</td>
+<td align="center">17 (实际不为猫，预测也不为猫)</td>
+</tr>
+</tbody></table>
+<p>更一般的对于二分类任务都可以用如下混淆矩阵来表示</p>
+<table>
+<thead>
+<tr>
+<th align="center"></th>
+<th align="center"></th>
+<th align="center">预测值</th>
+<th align="center">预测值</th>
+<th align="center">总数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center">P’</td>
+<td align="center">N‘</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center"><strong>真实值</strong></td>
+<td align="center">P</td>
+<td align="center">TP</td>
+<td align="center">FN</td>
+<td align="center">P</td>
+</tr>
+<tr>
+<td align="center"><strong>真实值</strong></td>
+<td align="center">N</td>
+<td align="center">FP</td>
+<td align="center">TN</td>
+<td align="center">N</td>
+</tr>
+<tr>
+<td align="center"><strong>总数</strong></td>
+<td align="center"></td>
+<td align="center">P’</td>
+<td align="center">N‘</td>
+<td align="center"></td>
+</tr>
+</tbody></table>
+<p>其中：</p>
+<ul>
+<li>True Positive(真正, TP)：将正类预测为正类数.</li>
+<li>True Negative(真负 , TN)：将负类预测为负类数.</li>
+<li>False Positive(假正, FP)：将负类预测为正类数 →→ <strong>误报</strong> (Type I error)</li>
+<li>False Negative(假负 , FN)：将正类预测为负类数 →→ <strong>漏报</strong> (Type II error)</li>
+</ul>
+<p>需要注意的是<strong>矩阵中的TP、FN、FP、TN中的Positive和Negative都是对预测值而言的</strong>，什么意思呢？例如真实值为P，而预测值为N’，矩阵中对应的那一栏并不是FP，而是FN，因为以上四个指标的Positive和Negative都是对预测值而言的，不要记混了。</p>
+<h3 id="二分类指标计算"><a href="#二分类指标计算" class="headerlink" title="二分类指标计算"></a>二分类指标计算</h3><ul>
+<li><p><strong>TPR(真正例率 True Positive Rate )</strong><br>$$<br>TPR = \frac{TP}{P} = \frac{TP}{TP + FN}<br>$$</p>
+</li>
+<li><p><strong>FPR(假正例率 True Positive Rate)</strong><br>$$<br>FPR = \frac{FP}{N} = \frac{FP}{FP + TN}<br>$$</p>
+<blockquote>
+<p>TPR的含义是：预测正确的正例的数量占所有真实正例数量的比例</p>
+<p>FPR的含义是：预测错误的正例的数量占所有错误正例数量的比例</p>
+</blockquote>
+</li>
+<li><p><strong>Precision(精确率/查准率)</strong><br>$$<br>Precision(P) = \frac{TP}{P’} = \frac{TP}{TP +FP}<br>$$</p>
+</li>
+<li><p><strong>Recall(召回率/查全率)</strong><br>$$<br>Recall(R) = \frac{TP}{P} = \frac{TP}{TP + FN}<br>$$</p>
+<blockquote>
+<p>Precision是针对<strong>预测结果</strong>而言的，它表示的是预测为正的样本中有多少是真正的正样本。用通俗的语言解释就是<strong>你预测为正例的里面有多少是对的</strong>。 </p>
+<p>Recall是针对<strong>原来的样本</strong>而言的，它表示的是样本中的正例有多少被预测正确了。</p>
+<p>Precision和Recall是一个<strong>负相关</strong>的关系，一个增加，另一个则减小，反之亦然。</p>
+<p>如果你的模型很贪婪，想要覆盖更多的正例，那么它就更有可能犯错。在这种情况下，你会有很高的Recall，但是较低的Precision。如果你的模型很保守，只对它很确信的正例作出预测，那么你的    Precision会很高，但是Recall会相对低。</p>
+<p>举个简单的例子，对于地震预测这种情况，我们肯定是希望“宁可错杀一千，绝不放过一个”，这个时候就可以在保证一定的Precision的条件下尽量提升Recall。而对于确定犯罪嫌疑人这种情况，就需要Precision更高一些。</p>
+</blockquote>
+</li>
+<li><p><strong>ACC(准确率)</strong><br>$$<br>ACC = \frac{TP + TN}{P + N}<br>$$</p>
+<blockquote>
+<p>ACC表示<strong>所有样本中有多少预测正确了</strong>。ACC将每个类看得同等的重要，所以在<strong>正负样本不平衡</strong>的情况下，准确率这个评价指标有很大的缺陷。</p>
+<p>举个简单的例子，比如在互联网广告里面，点击的数量是很少的，一般只有千分之几，如果用ACC，即使全部预测成负类（不点击）ACC也有 99% 以上，但是没有意义。</p>
+</blockquote>
+</li>
+<li><p><strong>F1值</strong><br>$$<br>F1 = \frac{2 \times P \times R}{P + R}<br>$$</p>
+</li>
+<li><p><strong>$F_\beta$值</strong><br>$$<br>F_\beta = \frac{(1 + \beta^2) \times P \times R}{(\beta^2 \times P) + R}<br>$$</p>
+<blockquote>
+<p>F1值是当$\beta = 1$时的情况，F1值是P与R的调和平均。</p>
+<p>当$\beta &gt; 1$时，R对于F值得影响会更大一些，即R的权重更大。</p>
+<p>当$\beta&lt;1$时，P对于F值得影响会更大一些，即P的权重更大。</p>
+</blockquote>
+</li>
+</ul>
+<ul>
+<li><p><strong>ROC曲线与AUC</strong></p>
+<p><img src="http://alexkong.net/images/Roccurves.png"></p>
+<blockquote>
+<p>ROC(Receiver Operating Characteristic)曲线和AUC(Area Under Curve)常被用来评价一个二值分类器的优劣。</p>
+<p>关于ROC曲线，需要关注四个点：</p>
+<ul>
+<li>首先是**(0,1)<strong>这个点，即</strong>FPR=0，TPR=1<strong>，这意味着</strong>FN=0<strong>，并且</strong>FP=0**。这说明分类器完全的将所有的类都正确的分对了，这毫无疑问是一个完美的分类器。</li>
+<li>接着是**(1,0)<strong>这个点，即</strong>FPR=1，TPR=0<strong>，这意味着</strong>TP=0，TN=0**。这说明分类器完全是走了另一个极端：没有一个样本分类正确，当然这个分类器也毫无用处。</li>
+<li>然后是**(0,0)<strong>这个点，即</strong>FPR=TPR=0<strong>，这意味着</strong>TP=0，FP=0**。也就是说分类器预测所有的样本都为负样本。</li>
+<li>最后是**(1,1)<strong>这个点，即</strong>FPR=TPR=1<strong>，这意味着</strong>TP=1，FP=1**。也就是说分类器预测所有的样本都为正样本。</li>
+</ul>
+<p>而对于图像中的对角虚线，则表示分类器的随机猜测结果。</p>
+<p>综上所述，我们能得出：<strong>ROC曲线越接近左上角，该分类器的性能越好。</strong></p>
+</blockquote>
+</li>
+</ul>
+<p>那么问题来了：对于一个特定的分类器和测试数据集，显然只能得到一个分类结果，即一组FPR和TPR结果，而要得到一个曲线，我们实际上需要一系列FPR和TPR的值，这又是如何得到的呢？</p>
+<p>我们知道，对于一个分类器是可以输出一个概率值的，即表示分类器认为某个样本具有多大的概率属于正样本(或负样本)。只需要设置一个**threashold(阈值)**就可以区分正负样本。例如下面的例子：</p>
+<p><img src="http://alexkong.net/images/score-ranking.png"></p>
+<p>从上面的图片可以看到，如果将threashold设置为0.6，则只有样本号为1,2,3,4的四个样本被预测为正例，那么就可以得到一组TPR和FPR了。以此类推，可以设置多个threashold，那么就可以得到很多组TPR和FPR了，就可以得到例如下图的ROC曲线了。<strong>一般来说，最佳的threashold就是曲线离左上角最近的点。</strong></p>
+<p><img src="http://alexkong.net/images/roc-example.png"></p>
+<p>当我们将threshold设置为1和0时，分别可以得到ROC曲线上的(0,0)和(1,1)两个点。将这些(FPR,TPR)对连接起来，就得到了ROC曲线。当threshold取值越多，ROC曲线越平滑。</p>
+<p>接下来就该轮到AUC(Area Under Curve)了。从字面意义就可以看出如何计算AUC，即ROC曲线下的面积，所以AUC始终是一个0到1的数。为什么有了ROC还要AUC呢？很简单，如果单纯的去看上方的那几条ROC曲线，你能看出来哪个分类的效果更好吗？而作为一个数值，对应<strong>AUC更大的分类器效果更好</strong>。</p>
+<p><img src="https://i.stack.imgur.com/9NpXJ.png"></p>
+<p>AUC值一般在0.5-1.0之间，如果等于0.5，那和随机猜测的结果是一样的，那么该分类器并没有什么价值。如果AUC值小于0.5，那么就需要注意是否将标签标记反了或者是模型真的真的很差。</p>
+<p>首先AUC值是一个概率值，当你随机挑选一个正样本以及一个负样本，当前的分类算法根据计算得到的Score值将这个正样本排在负样本前面的概率就是AUC值。所以<strong>AUC反映的是分类器对样本的排序能力。</strong>还需要注意的是<strong>AUC值对样本是否均衡并不敏感</strong>，因为ROC曲线对样本是否均衡也不敏感。</p>
+<ul>
+<li><p><strong>PR曲线</strong><br><img src="http://img.blog.csdn.net/20160712100637161"></p>
+<blockquote>
+<p>PR曲线是Precision(准确率)和Recall(召回率)的点连成的线。和ROC曲线类似，也是取不同的阈值而得到的一组PR从而画出来的曲线。且PR曲线的横坐标(Recall)与ROC的纵坐标(TPR)。</p>
+<p>不同于ROC曲线的是PR曲线效果最好的点是(1,1)，所以效果好的PR曲线是往右上角凸的。</p>
+</blockquote>
+</li>
+</ul>
+<p>就上面这个图来说，曲线A“包住”B，则A的效果优于B；且在正负样本分布得极不均匀(highly skewed datasets)的情况下，PR比ROC能更有效地反应分类器的好坏。可以通过下面的例子来解释：</p>
+<p><img src="https://pic4.zhimg.com/80/fd2c6445290cdf3c863664af155b9dd0_hd.jpg"></p>
+<p>如果单独看图(a)的话，两个分类器的效果可以说都是接近完美的，但是如果看这两个分类器所对应的PR曲线的时候就可以看出实际上这两个分类器的效果并不是很好。这是因为数据集存在严重的不平衡。所以在这种情况下，ROC的效果好是一种“表面现象”，而PR曲线则反映了这个分类器的实际效果。</p>
+<p>因为对于同一份数据不同的模型来说，<strong>ROC同时考虑了两个类别上的准确率</strong>，所以效果比PRC要好；但是<strong>PR由于仅考虑正样本</strong>，如果分布失衡，容易造成某个模型的PR很高，但其实是在样本量大的那个类别<strong>“带偏”</strong>了。</p>
+<p>反之，对于同一份数据同一个的模型来说（就只有一个模型，一个ROC，一个PR），因为ROC对类分布不敏感，就容易造成一个看似比较高的AUC对应的分类效果实际上并不好；而PR就会波动非常大，以一个很“激烈”的方式表现出效果的不好。</p>
+<p>同ROC一样，PR曲线下的AUC也可以表示一个模型的好坏。</p>
+<h3 id="多分类分类指标计算"><a href="#多分类分类指标计算" class="headerlink" title="多分类分类指标计算"></a>多分类分类指标计算</h3><ul>
+<li><strong>宏平均与微平均</strong></li>
+</ul>
+<p><strong>宏平均（Macro-averaging）</strong>，是先对每一个类分别建立混淆矩阵然后计算统计指标值，再对所有类求算术平均值。<br>$$<br>Macro_P = \frac{1}{n}\sum_{i=1}^{n}P_i<br>$$</p>
+<p>$$<br>Macro_R = \frac{1}{n}\sum_{i=1}^{n}R_i<br>$$</p>
+<p>$$<br>Macro_F_1 = \frac{1}{n}\sum_{i=1}^{n}F_i<br>$$</p>
+<p>$$<br>Macro_F_1 = \frac{2\times Macro_P \times Macro_R}{Macro_P + Macro_R}<br>$$</p>
+<p><strong>微平均（Micro-averaging）</strong>，是对数据集中的每一个实例不分类别进行统计建立全局混淆矩阵，然后计算相应指标。<br>$$<br>Micro_P = \frac{\sum_{i=1}^{n}TP_i}{\sum_{i=1}^{n}TP_i + \sum_{i=1}^{n}FP_i}<br>$$</p>
+<p>$$<br>Micro_R = \frac{\sum_{i=1}^{n}TP_i}{\sum_{i=1}^{n}TP_i + \sum_{i=1}^{n}FN_i}<br>$$</p>
+<p>$$<br>Micro_F_1 = \frac{2\times Micro_P \times Micro_R}{Micro_P + Micro_R}<br>$$</p>
+<blockquote>
+<p>n代表有多少个类别，例如前面猫狗兔的例子，n=3。</p>
+<p>宏平均与微平均的不同之处在于：<strong>宏平均赋予每个类相同的权重</strong>，然而<strong>微平均赋予每个样本决策相同的权重</strong>，因为从$F_1$值的计算公式可以看出，它忽略了那些被分类器正确判定为负类的那些样本，它的大小主要由被分类器正确判定为正类的那些样本决定的，在微平均评估指标中，样本数多的类别主导着样本数少的类。</p>
+<p>宏平均和微平均两种方式的结果可能相差很大，尤其是对于不均衡的测试集更是如此。宏平均是按类别求平均，微平均是按样本求平均，故<strong>宏平均的结果受小类别影响较大，微平均的结果受大类别影响较大</strong>。</p>
+</blockquote>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a target="_blank" rel="noopener" href="http://www.cnblogs.com/robert-dlut/p/5276927.html">谈谈评价指标中的宏平均和微平均</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/30643044">精确率、召回率、F1 值、ROC、AUC 各自的优缺点是什么？</a></p>
+<p><a target="_blank" rel="noopener" href="https://charleshm.github.io/2016/03/Model-Performance/">机器学习性能评估指标</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/cdeccd20d5d5">准确率(Precision)、召回率(Recall)、F值(F-Measure)</a></p>
+<p><a target="_blank" rel="noopener" href="http://alexkong.net/2013/06/introduction-to-auc-and-roc/">ROC和AUC介绍以及如何计算AUC</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/keedor/p/4463988.html">机器学习：ACC、ROC和AUC</a></p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>滕磊</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="https://immortalfish.github.io/2019/06/16/%E5%8D%95%E6%A0%87%E7%AD%BE%E5%88%86%E7%B1%BB%E8%AF%84%E4%BC%B0%E6%96%B9%E6%B3%95/">https://immortalfish.github.io/2019/06/16/%E5%8D%95%E6%A0%87%E7%AD%BE%E5%88%86%E7%B1%BB%E8%AF%84%E4%BC%B0%E6%96%B9%E6%B3%95/</a></span>
+                    </p>
+                
+                
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0-%E6%A8%A1%E5%9E%8B%E6%80%A7%E8%83%BD%E8%AF%84%E4%BC%B0/"># 机器学习, 模型性能评估</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2020/08/15/SQL%E6%80%BB%E7%BB%93/">SQL知识总结</a>
+            
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 滕磊 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>
